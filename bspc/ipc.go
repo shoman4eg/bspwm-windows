@@ -3,10 +3,11 @@ package bspc
 import (
 	"bytes"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"net"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 var errInvalidUnixSocket = errors.New("invalid unix socket")

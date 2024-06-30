@@ -39,15 +39,17 @@ const (
 	PointerActionStateTypeEnd   PointerActionStateType = "end"
 )
 
-type LayoutType string
-type SplitType string
-type DirectionType string
-type StateType string
-type FlagType string
-type RelativePositionType string
-type LayerType string
-type PointerActionType string
-type PointerActionStateType string
+type (
+	LayoutType             string
+	SplitType              string
+	DirectionType          string
+	StateType              string
+	FlagType               string
+	RelativePositionType   string
+	LayerType              string
+	PointerActionType      string
+	PointerActionStateType string
+)
 
 type Monitor struct {
 	// RandRID is the monitor's ID in the RandR tool.

@@ -1,11 +1,12 @@
 package bspc
 
 import (
-	"github.com/pkg/errors"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/pkg/errors"
 )
 
 type Client struct {
@@ -49,7 +50,6 @@ func NewClient() (*Client, error) {
 
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}

@@ -6,7 +6,9 @@ NC='\033[0m'
 
 all: build strip ## Run all
 
-GIT_IMPORT = github.com/shoman4eg/bspwm-windows/cmd
+GO_MOD_NAME = github.com/shoman4eg/bspwm-windows
+
+GIT_IMPORT = ${GO_MOD_NAME}/cmd
 GIT_COMMIT = $(shell git rev-parse --short HEAD)
 
 init: ## Install required tools
@@ -39,8 +41,8 @@ format: ## Format source code
 	@echo -e ${GREEN}[Format]${NC}
 
 	@bin/gofumpt -l -w $(FILES)
-	@bin/goimports -local github.com/shoman4eg/advert -l -w $(FILES)
-	@bin/gci write --section Standard --section Default --section "Prefix(github.com/shoman4eg/bspwm-windows)" $(FILES)
+	@bin/goimports -local ${GO_MOD_NAME} -l -w $(FILES)
+	@bin/gci write --section Standard --section Default --section "Prefix(${GO_MOD_NAME})" $(FILES)
 
 lint: ## Run required checkers and linters
 	@echo -e ${GREEN}[Lint]${NC}
