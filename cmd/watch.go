@@ -2,18 +2,18 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"log"
 	"os/signal"
 	"syscall"
 
 	"github.com/BurntSushi/toml"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/shoman4eg/bspwm-windows/bspc"
 	"github.com/shoman4eg/bspwm-windows/cmd/actions"
-	"github.com/shoman4eg/bspwm-windows/polybar"
+	"github.com/shoman4eg/bspwm-windows/config"
 )
 
 var cfg watchConfig
@@ -29,7 +29,6 @@ func (cfg *watchConfig) Flags() *pflag.FlagSet {
 
 	f.StringVarP(&cfg.monitor, "monitor", "m", "", "set monitor")
 	f.StringVar(&cfg.configPath, "config", "config.toml", "set config_path")
-	f.StringVar(&cfg.format, "format", "polybar", "set format for output")
 
 	return f
 }
@@ -45,14 +44,14 @@ var watchCmd = &cobra.Command{
 			return errors.WithMessage(err, "failed to create bspc client")
 		}
 
-		var config polybar.Config
+		var config config.Config
 
 		_, err = toml.DecodeFile(cfg.configPath, &config)
 		if err != nil {
 			return errors.WithMessage(err, "failed to load config file")
 		}
 
-		err = c.Subscribe(ctx, "node_add node_remove node_activate node_focus node_flag desktop_focus", func(bytes []byte) {
+		err = c.Subscribe(ctx, "monitor_focus node_add node_remove node_activate node_focus node_flag desktop_focus", func(bytes []byte) {
 			q := "query -N -n .window --desktop"
 
 			if cfg.monitor != "" {

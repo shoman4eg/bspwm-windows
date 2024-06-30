@@ -1,4 +1,4 @@
-package polybar
+package config
 
 type Config struct {
 	SortBy                    string            `toml:"sort_by"`
