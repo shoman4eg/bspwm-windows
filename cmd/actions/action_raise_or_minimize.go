@@ -2,7 +2,6 @@ package actions
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/spf13/cobra"
 
@@ -25,8 +24,6 @@ var raiseOrMinimizeActionCmd = &cobra.Command{
 		if err := client.Query(fmt.Sprintf("query -T -n %v", args[0]), bspc.ToStruct(&win)); err != nil {
 			return err
 		}
-
-		log.Printf("%+v", win)
 
 		state := "on"
 		if win.Hidden {

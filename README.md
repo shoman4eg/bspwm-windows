@@ -25,3 +25,7 @@ format = <label>
 If you have single monitor you can remove `-m $MONITOR` from exec
 
 // TODO
+
+Based on [diogox/bspc-go](https://github.com/diogox/bspc-go)
+
+

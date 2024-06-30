@@ -113,32 +113,6 @@ func (ipc *ipcConn) ReceiveAsync() (chan []byte, chan error) {
 		}
 	}(resCh, errCh)
 
-	//go func(resCh chan []byte, errCh chan error) {
-	//	for buffer := make([]byte, maxBufferSize); ; buffer = make([]byte, maxBufferSize) {
-	//
-	//		a, _, err := ipc.socketConn.ReadFromUnix(buffer)
-	//		log.Printf("failed to receive response: %v", a)
-	//		if err != nil {
-	//			if errors.Is(err, io.EOF) {
-	//				break
-	//			}
-	//
-	//			errCh <- errors.WithMessage(err, "failed to receive response")
-	//			break
-	//		}
-	//
-	//		if len(buffer) == 0 {
-	//			errCh <- errors.New("response was empty")
-	//			break
-	//		}
-	//
-	//		buffer = bytes.Trim(buffer, "\x00")
-	//		for _, res := range bytes.Split(buffer, []byte("\n")) { // This is needed because events sent in quick succession will be "glued" together, sometimes.
-	//			resCh <- res
-	//		}
-	//	}
-	//}(resCh, errCh)
-
 	return resCh, errCh
 }
 
