@@ -1,7 +1,9 @@
 package bspc
 
 import (
+	"context"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -10,8 +12,7 @@ import (
 )
 
 type Client struct {
-	socketPath string
-	ipc        ipcConn
+	socketAddr *net.UnixAddr
 }
 
 var regex *regexp.Regexp
@@ -24,14 +25,8 @@ func NewWithSocketPath(path string) (*Client, error) {
 		return nil, err
 	}
 
-	ipc, err := newIPCConn(socketAddr)
-	if err != nil {
-		return nil, errors.WithMessage(err, "failed to initialize socket connection")
-	}
-
 	return &Client{
-		socketPath: path,
-		ipc:        ipc,
+		socketAddr: socketAddr,
 	}, nil
 }
 
@@ -43,7 +38,6 @@ func NewClient() (*Client, error) {
 		}
 
 		if regex.MatchString(path) {
-			log.Printf("found file: %s", path)
 			socketPath = path
 			return nil
 		}
@@ -65,11 +59,21 @@ func NewClient() (*Client, error) {
 // response into the provided type. The models provided in this package can be used to construct
 // the response type.
 func (c *Client) Query(rawCmd string, resResolver QueryResponseResolver) error {
-	if err := c.ipc.Send(ipcCommand(rawCmd)); err != nil {
+	ipc, err := newIPCConn(c.socketAddr)
+	if err != nil {
+		return errors.WithMessage(err, "failed to initialize socket connection")
+	}
+	defer func(ipc *ipcConn) {
+		if err0 := ipc.Close(); err0 != nil {
+			log.Printf("failed to close socket connection: %v", err0)
+		}
+	}(ipc)
+
+	if err = ipc.Send(ipcCommand(rawCmd)); err != nil {
 		return err
 	}
 
-	resBytes, err := c.ipc.Receive()
+	resBytes, err := ipc.Receive()
 	if err != nil {
 		return errors.WithMessage(err, "query failed: %v")
 	}
@@ -81,6 +85,34 @@ func (c *Client) Query(rawCmd string, resResolver QueryResponseResolver) error {
 	if err = resResolver(resBytes); err != nil {
 		return errors.WithMessage(err, "failed to unmarshal response")
 	}
+
+	return nil
+}
+
+func (c *Client) Subscribe(ctx context.Context, params string, callback func([]byte)) error {
+	ipc, err := newIPCConn(c.socketAddr)
+	if err != nil {
+		return errors.WithMessage(err, "failed to initialize socket connection")
+	}
+	defer func(ipc *ipcConn) {
+		if err0 := ipc.Close(); err0 != nil {
+			log.Printf("failed to close socket connection: %v", err0)
+		}
+	}(ipc)
+
+	if err = ipc.Send(ipcCommand("subscribe " + params)); err != nil {
+		return errors.WithMessage(err, "failed to subscribe report")
+	}
+
+	resCh, _ := ipc.ReceiveAsync()
+
+	go func(resCh chan []byte) {
+		for res := range resCh {
+			callback(res)
+		}
+	}(resCh)
+
+	<-ctx.Done()
 
 	return nil
 }

@@ -7,6 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
+	"github.com/shoman4eg/bspwm-windows/cmd/actions"
 )
 
 var RootCmd = &cobra.Command{
@@ -39,4 +41,5 @@ func bindEnv(cmd *cobra.Command) {
 
 func init() {
 	RootCmd.AddCommand(watchCmd)
+	RootCmd.AddCommand(actions.RootCmd)
 }

@@ -41,20 +41,20 @@ type ipcConn struct {
 	socketConn *net.UnixConn
 }
 
-func newIPCConn(unixSocketAddr *net.UnixAddr) (ipcConn, error) {
+func newIPCConn(unixSocketAddr *net.UnixAddr) (*ipcConn, error) {
 	// TODO: For this line too
 	conn, err := net.DialUnix("unix", nil, unixSocketAddr)
 	if err != nil {
-		return ipcConn{}, fmt.Errorf("%w: %v", errInvalidUnixSocket, err)
+		return nil, fmt.Errorf("%w: %v", errInvalidUnixSocket, err)
 	}
 
-	return ipcConn{
+	return &ipcConn{
 		socketAddr: unixSocketAddr,
 		socketConn: conn,
 	}, nil
 }
 
-func (ipc ipcConn) Send(cmd ipcCommand) error {
+func (ipc *ipcConn) Send(cmd ipcCommand) error {
 	// TODO: For this line too
 	if _, err := ipc.socketConn.Write([]byte(cmd.intoMessage())); err != nil {
 		return fmt.Errorf("failed to send message: %v", err)
@@ -63,7 +63,7 @@ func (ipc ipcConn) Send(cmd ipcCommand) error {
 	return nil
 }
 
-func (ipc ipcConn) Receive() ([]byte, error) {
+func (ipc *ipcConn) Receive() ([]byte, error) {
 	const maxBufferSize = 512
 
 	var msg []byte
@@ -84,7 +84,7 @@ func (ipc ipcConn) Receive() ([]byte, error) {
 	return bytes.Trim(msg, "\x00"), nil
 }
 
-func (ipc ipcConn) ReceiveAsync() (chan []byte, chan error) {
+func (ipc *ipcConn) ReceiveAsync() (chan []byte, chan error) {
 	var (
 		resCh = make(chan []byte)
 		errCh = make(chan error, 1)
@@ -94,7 +94,7 @@ func (ipc ipcConn) ReceiveAsync() (chan []byte, chan error) {
 
 	go func(resCh chan []byte, errCh chan error) {
 		for buffer := make([]byte, maxBufferSize); ; buffer = make([]byte, maxBufferSize) {
-			_, _, err := ipc.socketConn.ReadFromUnix(buffer)
+			n, _, err := ipc.socketConn.ReadFromUnix(buffer)
 			if err != nil {
 				if errors.Is(err, io.EOF) {
 					break
@@ -109,16 +109,39 @@ func (ipc ipcConn) ReceiveAsync() (chan []byte, chan error) {
 				break
 			}
 
-			buffer = bytes.Trim(buffer, "\x00")
-			for _, res := range bytes.Split(buffer, []byte("\n")) { // This is needed because events sent in quick succession will be "glued" together, sometimes.
-				resCh <- res
-			}
+			resCh <- bytes.Trim(buffer[0:n], "\x00\n")
 		}
 	}(resCh, errCh)
+
+	//go func(resCh chan []byte, errCh chan error) {
+	//	for buffer := make([]byte, maxBufferSize); ; buffer = make([]byte, maxBufferSize) {
+	//
+	//		a, _, err := ipc.socketConn.ReadFromUnix(buffer)
+	//		log.Printf("failed to receive response: %v", a)
+	//		if err != nil {
+	//			if errors.Is(err, io.EOF) {
+	//				break
+	//			}
+	//
+	//			errCh <- errors.WithMessage(err, "failed to receive response")
+	//			break
+	//		}
+	//
+	//		if len(buffer) == 0 {
+	//			errCh <- errors.New("response was empty")
+	//			break
+	//		}
+	//
+	//		buffer = bytes.Trim(buffer, "\x00")
+	//		for _, res := range bytes.Split(buffer, []byte("\n")) { // This is needed because events sent in quick succession will be "glued" together, sometimes.
+	//			resCh <- res
+	//		}
+	//	}
+	//}(resCh, errCh)
 
 	return resCh, errCh
 }
 
-func (ipc ipcConn) Close() error {
+func (ipc *ipcConn) Close() error {
 	return ipc.socketConn.Close()
 }
