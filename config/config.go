@@ -1,10 +1,9 @@
 package config
 
+import "fmt"
+
 type Config struct {
-	SortBy                    string            `toml:"sort_by"`
 	MaxWindows                int               `toml:"max_windows"`
-	Name                      string            `toml:"name"`
-	NameCase                  string            `toml:"name_case"`
 	NameMaxLength             int               `toml:"name_max_length"`
 	NamePadding               int               `toml:"name_padding"`
 	SeparatorString           string            `toml:"separator_string"`
@@ -39,9 +38,6 @@ type Config struct {
 	EmptyDesktopFgColor       string            `toml:"empty_desktop_fg_color"`
 	EmptyDesktopBgColor       string            `toml:"empty_desktop_bg_color"`
 	EmptyDesktopUlColor       string            `toml:"empty_desktop_ul_color"`
-	OverflowFgColor           string            `toml:"overflow_fg_color"`
-	OverflowBgColor           string            `toml:"overflow_bg_color"`
-	OverflowUlColor           string            `toml:"overflow_ul_color"`
 	Flags                     Flags             `toml:"flags"`
 	IgnoredClasses            []string          `toml:"ignored_classes"`
 	WindowNicknames           map[string]string `toml:"window_nicknames"`
@@ -73,6 +69,18 @@ func (c Config) GetFgColor(isActive, isHidden bool) string {
 	}
 	if isHidden && c.HiddenWindowFgColor != "" {
 		color = c.HiddenWindowFgColor
+	}
+
+	return color
+}
+
+func (c Config) GetUlColor(isActive, isHidden bool) string {
+	color := c.InactiveWindowUlColor
+	if isActive && c.ActiveWindowUlColor != "" {
+		color = c.ActiveWindowUlColor
+	}
+	if isHidden && c.HiddenWindowUlColor != "" {
+		color = c.HiddenWindowUlColor
 	}
 
 	return color
@@ -126,4 +134,18 @@ func (c Config) GetActionScrollDown(isActive, isHidden bool) string {
 		return c.HiddenWindowScrollDown
 	}
 	return c.InactiveWindowScrollDown
+}
+
+func FormatStringColors(string, bgColor, fgColor, ulColor string) string {
+	if bgColor != "" {
+		string = fmt.Sprintf("%%{B%v}%v%%{B-}", bgColor, string)
+	}
+	if fgColor != "" {
+		string = fmt.Sprintf("%%{F%v}%v%%{F-}", fgColor, string)
+	}
+	if ulColor != "" {
+		string = fmt.Sprintf("%%{u%v}%%{+u}%v%%{-u}", ulColor, string)
+	}
+
+	return string
 }

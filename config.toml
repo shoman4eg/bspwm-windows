@@ -1,12 +1,9 @@
-sort_by = "none" # "none" | "position" | "application"
 max_windows = 13
 
-name = "class" # "class" | "title"
-name_case = "none" # "none" | "lowercase" | "uppercase"
 name_max_length = 30
 name_padding = 1
 
-separator_string = "·"
+separator_string = ""
 empty_desktop_string = ""
 
 active_window_left_click = "raise_or_minimize"
@@ -29,7 +26,7 @@ hidden_window_scroll_down = ""
 
 active_window_fg_color = ""
 active_window_bg_color = "#292e42"
-active_window_ul_color = ""
+active_window_ul_color = "#a9b1d6"
 
 inactive_window_fg_color = ""
 inactive_window_bg_color = ""
@@ -39,17 +36,13 @@ hidden_window_fg_color = "#3b4261"
 hidden_window_bg_color = ""
 hidden_window_ul_color = ""
 
-separator_fg_color = "#808080"
+separator_fg_color = "#7dcfff"
 separator_bg_color = ""
 separator_ul_color = ""
 
 empty_desktop_fg_color = ""
 empty_desktop_bg_color = ""
 empty_desktop_ul_color = ""
-
-overflow_fg_color = ""
-overflow_bg_color = ""
-overflow_ul_color = ""
 
 [flags]
 sticky = ""
