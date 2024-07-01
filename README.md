@@ -26,6 +26,6 @@ If you have single monitor you can remove `-m $MONITOR` from exec
 
 // TODO
 
-Based on [diogox/bspc-go](https://github.com/diogox/bspc-go)
+Based on [diogox/bspc-go](https://github.com/diogox/bspc-go) and [tuurep/windowlist](https://github.com/tuurep/windowlist)
 
 
