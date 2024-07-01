@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os/signal"
+	"slices"
 	"strings"
 	"syscall"
 
@@ -11,7 +12,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"slices"
 
 	"github.com/shoman4eg/bspwm-windows/bspc"
 	"github.com/shoman4eg/bspwm-windows/cmd/actions"

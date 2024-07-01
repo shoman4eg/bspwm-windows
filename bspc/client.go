@@ -120,7 +120,6 @@ func (c *Client) Subscribe(ctx context.Context, params string, callback func([]b
 func init() {
 	var err error
 	regex, err = regexp.Compile(`^/tmp/\w+_\d+_\d+-socket$`)
-
 	if err != nil {
 		log.Panic("Failed to compile regex")
 	}
