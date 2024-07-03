@@ -89,7 +89,7 @@ func (c *Client) Query(rawCmd string, resResolver QueryResponseResolver) error {
 	return nil
 }
 
-func (c *Client) Subscribe(ctx context.Context, params string, callback func([]byte)) error {
+func (c *Client) Subscribe(ctx context.Context, events string, resResolver QueryResponseResolver) error {
 	ipc, err := newIPCConn(c.socketAddr)
 	if err != nil {
 		return errors.WithMessage(err, "failed to initialize socket connection")
@@ -100,7 +100,7 @@ func (c *Client) Subscribe(ctx context.Context, params string, callback func([]b
 		}
 	}(ipc)
 
-	if err = ipc.Send(ipcCommand("subscribe " + params)); err != nil {
+	if err = ipc.Send(ipcCommand("subscribe " + events)); err != nil {
 		return errors.WithMessage(err, "failed to subscribe report")
 	}
 
@@ -108,7 +108,9 @@ func (c *Client) Subscribe(ctx context.Context, params string, callback func([]b
 
 	go func(resCh chan []byte) {
 		for res := range resCh {
-			callback(res)
+			if err = resResolver(res); err != nil {
+				log.Print(err)
+			}
 		}
 	}(resCh)
 

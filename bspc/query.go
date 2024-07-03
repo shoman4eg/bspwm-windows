@@ -26,7 +26,7 @@ func hexToID(hex string) (ID, error) {
 	if hex == "" {
 		return 0, nil
 	}
-	id, err := strconv.ParseUint(strings.Replace(hex, "x0", "", 1), 16, 32)
+	id, err := strconv.ParseUint(strings.Replace(hex, "0x", "", 1), 16, 32)
 	if err != nil {
 		return 0, fmt.Errorf("failed to parse hex to ID: %v", err)
 	}

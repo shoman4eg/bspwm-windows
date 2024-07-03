@@ -52,7 +52,7 @@ var watchCmd = &cobra.Command{
 			return errors.WithMessage(err, "failed to load mCfg file")
 		}
 
-		err = c.Subscribe(ctx, "monitor_focus node_add node_remove node_activate node_focus node_flag desktop_focus", func(bytes []byte) {
+		err = c.Subscribe(ctx, "monitor_focus node_add node_remove node_activate node_focus node_flag desktop_focus", func(bytes []byte) error {
 			q := "query -N -n .window --desktop"
 
 			if cfg.monitor != "" {
@@ -75,7 +75,7 @@ var watchCmd = &cobra.Command{
 
 			if len(allIDs) == 0 {
 				fmt.Println(config.FormatStringColors(mCfg.EmptyDesktopString, mCfg.EmptyDesktopBgColor, mCfg.EmptyDesktopFgColor, mCfg.EmptyDesktopUlColor))
-				return
+				return nil
 			}
 
 			separator := config.FormatStringColors(mCfg.SeparatorString, mCfg.SeparatorBgColor, mCfg.SeparatorFgColor, mCfg.SeparatorUlColor)
@@ -147,6 +147,8 @@ var watchCmd = &cobra.Command{
 				labels = append(labels, label)
 			}
 			fmt.Println(strings.Join(labels, separator))
+
+			return nil
 		})
 		if err != nil {
 			return err
